@@ -1,25 +1,64 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import Quiz from "./components/Quiz";
+import QuizControls from "./components/QuizControls";
+import Banner from "./components/Banner/Banner";
+import questions from "./Data/questions";
+import answers from "./Data/answers";
+import "./App.module.css";
 
-function App() {
+const App = () => {
+  const [startQuiz, setStartQuiz] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+
+  const handleAnswer = (questionId, optionId) => {
+    setSelectedAnswers((prevState) => ({
+      ...prevState,
+      [questionId]: optionId,
+    }));
+  };
+
+  const handleComplete = () => {
+    setStartQuiz(false);
+  };
+
+  const calculateScore = () => {
+    let correct = 0;
+    Object.entries(selectedAnswers).forEach(([questionId, optionId]) => {
+      if (answers[questionId] === optionId) {
+        correct++;
+      }
+    });
+
+    return {
+      correct,
+      total: questions.length,
+    };
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Banner />
+      {startQuiz && (
+        <Quiz
+          questions={questions}
+          onAnswer={handleAnswer}
+          onComplete={handleComplete}
+        />
+      )}
+      <div className="controls-container">
+        <QuizControls
+          startQuiz={startQuiz}
+          score={calculateScore()}
+          onStart={() => {
+            setStartQuiz(true);
+            setSelectedAnswers({});
+          }}
+          onComplete={handleComplete}
+        />
+      </div>
+    </>
   );
-}
+};
 
 export default App;
+
